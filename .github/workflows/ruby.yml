@@ -36,15 +36,6 @@ jobs:
         with:
           ruby-version: 2.6.10
 
-      - name: Set Environment Variables
-        run: |
-          echo "DB_HOST=db" >> $GITHUB_ENV
-          echo "DB_PORT=5432" >> $GITHUB_ENV
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
-          echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
-          echo "SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}" >> $GITHUB_ENV
-
       - name: Install Bundler
         run: gem install bundler:2.2.29
 
@@ -52,9 +43,17 @@ jobs:
         run: bundle install --jobs 4 --retry 3 --without development test
 
       - name: Database Setup
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: bundle exec rails db:create db:migrate RAILS_ENV=production
 
       - name: Build and Push Docker Image
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
           echo "${{ secrets.TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
           docker build -t docker.pkg.github.com/${{ github.repository }}/myredmine:latest .
