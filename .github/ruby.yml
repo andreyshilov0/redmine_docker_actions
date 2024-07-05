@@ -54,3 +54,5 @@ jobs:
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
+          # Write your deployment script here
+          # Example: ssh into production server and pull the latest Docker image
