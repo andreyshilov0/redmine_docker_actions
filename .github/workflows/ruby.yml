@@ -27,6 +27,9 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -49,7 +52,6 @@ jobs:
           DB_NAME: redminedb
           DB_USER: admin_for_redmine
           DB_PASSWORD: redmine
-          SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
         run: bundle exec rails db:create db:migrate RAILS_ENV=production
 
       - name: Build and Push Docker Image
