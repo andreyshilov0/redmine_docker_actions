@@ -11,4 +11,3 @@ RUN gem install bundler:2.2.29
 RUN bundle install --without development test
 EXPOSE 80
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-e", "production"]
-#CMD [ bundle exec rails server -b 0.0.0.0 -e production"]

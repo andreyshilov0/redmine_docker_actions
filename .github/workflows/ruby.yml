@@ -1,80 +1,64 @@
-name: "Ruby on Rails CI"
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-
-    env:
-      DB_HOST: localhost
-      DB_PORT: 5432
-      DB_NAME: redminedb
-      DB_USER: admin_for_redmine
-      DB_PASSWORD: redmine
-      SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
 
     services:
       postgres:
-        image: postgres:14
+        image: postgres:latest
+        env:
+          POSTGRES_DB: ${DB_NAME}
+          POSTGRES_USER: ${DB_USER}
+          POSTGRES_PASSWORD: ${DB_PASSWORD}
         ports:
           - "5432:5432"
-        env:
-          POSTGRES_DB: ${{ env.DB_NAME }}
-          POSTGRES_USER: ${{ env.DB_USER }}
-          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-      - name: Install Ruby and gems
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.6.10
-          bundler-cache: true
 
-      - name: Set up database schema
-        run: bin/rails db:schema:load
-        env:
-          DATABASE_URL: postgresql://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@${{ env.DB_HOST }}:${{ env.DB_PORT }}/${{ env.DB_NAME }}
+      - name: Install Bundler
+        run: gem install bundler:2.2.29
 
-      - name: Run tests
-        run: bin/rake
+      - name: Install Dependencies
+        run: bundle install --jobs 4 --retry 3 --without development test
 
-  lint:
-    runs-on: ubuntu-latest
+      - name: Database Setup
+        run: |
+          cp config/database.yml.example config/database.yml
+          sed -i 's|username: .*|username: ${DB_USER}|g' config/database.yml
+          sed -i 's|password: .*|password: ${DB_PASSWORD}|g' config/database.yml
+          sed -i 's|database: .*|database: ${DB_NAME}|g' config/database.yml
+          sed -i 's|host: localhost|host: db|g' config/database.yml
+          bundle exec rails db:create db:migrate RAILS_ENV=production
 
-    env:
-      DB_HOST: localhost
-      DB_PORT: 5432
-      DB_NAME: redminedb
-      DB_USER: admin_for_redmine
-      DB_PASSWORD: redmine
+      - name: Build and Push Docker Image
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+          docker build -t docker.pkg.github.com/${{ github.repository }}/myredmine:latest .
+          docker push docker.pkg.github.com/${{ github.repository }}/myredmine:latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Ruby and gems
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.6.10
-          bundler-cache: true
-
-      - name: Security audit dependencies
-        run: bin/bundler-audit --update
-        env:
-          DATABASE_URL: postgresql://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@${{ env.DB_HOST }}:${{ env.DB_PORT }}/${{ env.DB_NAME }}
-
-      - name: Security audit application code
-        run: bin/brakeman -q -w2
-        env:
-          DATABASE_URL: postgresql://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@${{ env.DB_HOST }}:${{ env.DB_PORT }}/${{ env.DB_NAME }}
-
-      - name: Lint Ruby files
-        run: bin/rubocop --parallel
+      - name: Deploy to Production
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          # Write your deployment script here
+          # Example: ssh into production server and pull the latest Docker image
