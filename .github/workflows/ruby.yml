@@ -44,11 +44,11 @@ jobs:
 
       - name: Database Setup
         run: |
-          cp config/database.yml.example config/database.yml
-          sed -i 's|username: .*|username: ${DB_USER}|g' config/database.yml
-          sed -i 's|password: .*|password: ${DB_PASSWORD}|g' config/database.yml
-          sed -i 's|database: .*|database: ${DB_NAME}|g' config/database.yml
-          sed -i 's|host: localhost|host: db|g' config/database.yml
+   #       cp config/database.yml.example config/database.yml
+    #      sed -i 's|username: .*|username: ${DB_USER}|g' config/database.yml
+    #      sed -i 's|password: .*|password: ${DB_PASSWORD}|g' config/database.yml
+    #      sed -i 's|database: .*|database: ${DB_NAME}|g' config/database.yml
+    #      sed -i 's|host: localhost|host: db|g' config/database.yml
           bundle exec rails db:create db:migrate RAILS_ENV=production
 
       - name: Build and Push Docker Image
