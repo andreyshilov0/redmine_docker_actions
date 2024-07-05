@@ -49,12 +49,12 @@ jobs:
           DB_NAME: redminedb
           DB_USER: admin_for_redmine
           DB_PASSWORD: redmine
-          SECRET_KEY_BASE: bbf0b5f53cdd840151df5e8b97faedb431495cc55fd55393a7cef020a62866ced24fa480fc13854d2687
+          SECRET_KEY_BASE: ${{ env.SECRET_KEY_BASE }}
         run: bundle exec rails db:create db:migrate RAILS_ENV=production
 
       - name: Build and Push Docker Image
         env:
-          GITHUB_TOKEN: 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
+          GITHUB_TOKEN: ${{ env.TOKEN }}
         run: |
           docker build -t docker.pkg.github.com/${{ github.repository }}/myredmine:latest .
           docker push docker.pkg.github.com/${{ github.repository }}/myredmine:latest
