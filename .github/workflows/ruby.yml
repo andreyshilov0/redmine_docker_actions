@@ -51,12 +51,12 @@ jobs:
 
       - name: Database Setup
         env:
-          DB_HOST: 192.168.1.100
+          DB_HOST: db
           DB_PORT: 5432
           DB_NAME: redminedb
           DB_USER: admin_for_redmine
           DB_PASSWORD: redmine
-        run: bundle exec rails db:create db:migrate RAILS_ENV=production
+        run: bundle exec db:migrate RAILS_ENV=production
 
       - name: Build and Push Docker Image
         env:
