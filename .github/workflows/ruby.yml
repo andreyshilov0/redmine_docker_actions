@@ -29,6 +29,12 @@ jobs:
 
     steps:
       - name: Checkout Repository
+        run: cat config/database.yml
+
+      - name: Display environment variables
+        run: env
+      
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Set up Ruby
@@ -43,8 +49,7 @@ jobs:
         run: bundle install --jobs 4 --retry 3 --without development test
 
       - name: Database Setup
-        run: |
-          bundle exec rails db:create db:migrate RAILS_ENV=production
+        run: bundle exec rails db:create db:migrate RAILS_ENV=production
 
       - name: Build and Push Docker Image
         run: |
