@@ -4,14 +4,13 @@
 
 production:
   adapter: postgresql
-  database: redminedb
-  host: db
-  port: 5432
-  username: admin_for_redmine 
-  password: redmine
+  database: <%= ENV['DB_NAME'] %>
+  host: <%= ENV['DB_HOST'] %>
+  port: <%= ENV['DB_PORT'] %>
+  username: <%= ENV['DB_USER'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
   encoding: utf8
   timeout: 5000
-
 
 
 #development:
