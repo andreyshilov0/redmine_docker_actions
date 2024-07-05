@@ -32,8 +32,9 @@ jobs:
 
     steps:
       - name: Check env
-        run: echo ${{ secrets.SECRET_KEY_BASE }}
-
+        run: |
+            echo ${{ env.SECRET_KEY_BASE }}
+            echo ${{ secrets.SECRET_KEY_BASE }}
       - name: Checkout Repository
         uses: actions/checkout@v2
 
