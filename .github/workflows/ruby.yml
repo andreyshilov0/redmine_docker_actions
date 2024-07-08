@@ -54,3 +54,5 @@ jobs:
           DB_PASSWORD: ${{ vars.DB_PASSWORD }}
         run: bundle exec rails db:migrate RAILS_ENV=production
 
+      - name: Build Docker image
+        run: docker build . -t redmine
