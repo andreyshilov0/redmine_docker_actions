@@ -31,10 +31,6 @@ jobs:
       SECRET_KEY_BASE: ${{ vars.SECRET_KEY_BASE }}
 
     steps:
-      - name: Check env
-        run: |
-            echo ${{ vars.SECRET_KEY_BASE }}
-            echo ${{ vars.SECRET_KEY_BASE }}
       - name: Checkout Repository
         uses: actions/checkout@v2
 
@@ -58,15 +54,3 @@ jobs:
           DB_PASSWORD: ${{ vars.DB_PASSWORD }}
         run: bundle exec rails db:migrate RAILS_ENV=production
 
-      - name: Build and Push Docker Image
-        env:
-          GITHUB_TOKEN: ${{ vars.TOKEN }}
-        run: |
-          docker build -t docker.pkg.github.com/${{ github.repository }}/myredmine:latest .
-          docker push docker.pkg.github.com/${{ github.repository }}/myredmine:latest
-
-      - name: Deploy to Production
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          # Write your deployment script here
-          # Example: ssh into production server and pull the latest Docker image
