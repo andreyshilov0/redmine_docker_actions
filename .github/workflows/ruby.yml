@@ -28,13 +28,13 @@ jobs:
           --health-retries 5
 
     env:
-      SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+      SECRET_KEY_BASE: ${{ vars.SECRET_KEY_BASE }}
 
     steps:
       - name: Check env
         run: |
-            echo ${{ env.SECRET_KEY_BASE }}
-            echo ${{ secrets.SECRET_KEY_BASE }}
+            echo ${{ vars.SECRET_KEY_BASE }}
+            echo ${{ vars.SECRET_KEY_BASE }}
       - name: Checkout Repository
         uses: actions/checkout@v2
 
@@ -51,16 +51,16 @@ jobs:
 
       - name: Database Setup
         env:
-          DB_HOST: db
-          DB_PORT: 5432
-          DB_NAME: redminedb
-          DB_USER: admin_for_redmine
-          DB_PASSWORD: redmine
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          DB_USER: ${{ vars.DB_USER }}
+          DB_PASSWORD: ${{ vars.DB_PASSWORD }}
         run: bundle exec rails db:migrate RAILS_ENV=production
 
       - name: Build and Push Docker Image
         env:
-          GITHUB_TOKEN: ${{ env.TOKEN }}
+          GITHUB_TOKEN: ${{ vars.TOKEN }}
         run: |
           docker build -t docker.pkg.github.com/${{ github.repository }}/myredmine:latest .
           docker push docker.pkg.github.com/${{ github.repository }}/myredmine:latest
